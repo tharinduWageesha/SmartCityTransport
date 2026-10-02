@@ -37,6 +37,20 @@ public:
     int getBusRouteCount();
 
     BusRoute getBusRoute(int index);
+
+    vector<int> findBusesAtStop(int stopId);
+
+    bool isStopInRoute(
+        int busIndex,
+        int stopId
+    );
+
+    bool canTravelByBus(
+        int startStop,
+        int destinationStop
+    );
+
+    void displayBusesAtStop(int stopId);
 };
 
 #endif

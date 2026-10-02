@@ -1,4 +1,3 @@
-
 #ifndef GRAPH_H
 #define GRAPH_H
 
@@ -8,18 +7,21 @@
 
 using namespace std;
 
-struct Edge {
+struct Edge
+{
     int destination;
     int travelTime;
     string transportMode;
 };
 
-struct Location {
+struct Location
+{
     int id;
     string name;
 };
 
-class Graph {
+class Graph
+{
 private:
     vector<Location> locations;
     vector<vector<Edge>> adjacencyList;
@@ -27,12 +29,16 @@ private:
 public:
     int addLocation(string name);
 
-    void addConnection(int from, int to,
-                       int travelTime,
-                       string transportMode);
+    void addConnection(
+        int from,
+        int to,
+        int travelTime,
+        string transportMode
+    );
 
     void addBidirectionalConnection(
-        int from, int to,
+        int from,
+        int to,
         int travelTime,
         string transportMode
     );
