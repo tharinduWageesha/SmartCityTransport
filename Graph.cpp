@@ -37,8 +37,19 @@ void Graph::addBidirectionalConnection(
     string transportMode
 )
 {
-    addConnection(from, to, travelTime, transportMode);
-    addConnection(to, from, travelTime, transportMode);
+    addConnection(
+        from,
+        to,
+        travelTime,
+        transportMode
+    );
+
+    addConnection(
+        to,
+        from,
+        travelTime,
+        transportMode
+    );
 }
 
 void Graph::displayLocations()
@@ -47,8 +58,10 @@ void Graph::displayLocations()
 
     for (const Location& location : locations)
     {
-        cout << location.id << " - "
-             << location.name << endl;
+        cout << location.id
+             << " - "
+             << location.name
+             << endl;
     }
 }
 
@@ -56,15 +69,21 @@ void Graph::displayConnections()
 {
     cout << "\n--- Transportation Connections ---\n";
 
-    for (int i = 0; i < adjacencyList.size(); i++)
+    for (int i = 0;
+         i < adjacencyList.size();
+         i++)
     {
-        cout << locations[i].name << " -> ";
+        cout << locations[i].name
+             << " -> ";
 
-        for (const Edge& edge : adjacencyList[i])
+        for (const Edge& edge :
+             adjacencyList[i])
         {
             cout << locations[edge.destination].name
-                 << " [" << edge.transportMode
-                 << ", " << edge.travelTime
+                 << " ["
+                 << edge.transportMode
+                 << ", "
+                 << edge.travelTime
                  << " min] ";
         }
 
@@ -77,7 +96,7 @@ int Graph::getLocationCount()
     return locations.size();
 }
 
-string Graph::getLocationName(int id)
+string Graph::getLocationName(int id) const
 {
     if (id < 0 || id >= locations.size())
     {
@@ -89,7 +108,8 @@ string Graph::getLocationName(int id)
 
 vector<Edge> Graph::getEdges(int id)
 {
-    if (id < 0 || id >= adjacencyList.size())
+    if (id < 0 ||
+        id >= adjacencyList.size())
     {
         return {};
     }

@@ -14,9 +14,8 @@ void BusNetwork::addBusRoute(
     route.busNumber = busNumber;
     route.routeName = routeName;
     route.stops = stops;
-    route.capacity = capacity;
 
-    // Initially the bus has no passengers
+    route.capacity = capacity;
     route.currentPassengers = 0;
 
     route.startTime = startTime;
@@ -25,11 +24,17 @@ void BusNetwork::addBusRoute(
     busRoutes.push_back(route);
 }
 
+
+// ==========================================
+// DISPLAY BUS ROUTES
+// ==========================================
+
 void BusNetwork::displayBusRoutes()
 {
     cout << "\n===== BUS NETWORK =====\n";
 
-    for (const BusRoute& route : busRoutes)
+    for (const BusRoute& route :
+         busRoutes)
     {
         cout << "\nBus Number: "
              << route.busNumber;
@@ -39,7 +44,8 @@ void BusNetwork::displayBusRoutes()
 
         cout << "\nStops: ";
 
-        for (int stop : route.stops)
+        for (int stop :
+             route.stops)
         {
             cout << stop << " ";
         }
@@ -59,14 +65,78 @@ void BusNetwork::displayBusRoutes()
     }
 }
 
+
+// ==========================================
+// DISPLAY BUS ROUTES WITH LOCATION NAMES
+// ==========================================
+
+void BusNetwork::displayBusRoutes(
+    const Graph& city
+)
+{
+    cout << "\n===== BUS NETWORK =====\n";
+
+    for (const BusRoute& route :
+         busRoutes)
+    {
+        cout << "\nBus Number: "
+             << route.busNumber;
+
+        cout << "\nRoute: "
+             << route.routeName;
+
+        cout << "\nStops: ";
+
+        for (int i = 0;
+             i < route.stops.size();
+             i++)
+        {
+            cout << city.getLocationName(
+                route.stops[i]
+            );
+
+            if (i < route.stops.size() - 1)
+            {
+                cout << " -> ";
+            }
+        }
+
+        cout << "\nCapacity: "
+             << route.capacity;
+
+        cout << "\nCurrent Passengers: "
+             << route.currentPassengers;
+
+        cout << "\nOperating Time: "
+             << route.startTime
+             << " - "
+             << route.endTime;
+
+        cout << "\n";
+    }
+}
+
+
+// ==========================================
+// GET BUS ROUTE COUNT
+// ==========================================
+
 int BusNetwork::getBusRouteCount()
 {
     return busRoutes.size();
 }
 
-BusRoute BusNetwork::getBusRoute(int index)
+
+// ==========================================
+// GET BUS ROUTE
+// ==========================================
+
+BusRoute BusNetwork::getBusRoute(
+    int index
+)
 {
-    if (index < 0 || index >= busRoutes.size())
+    if (index < 0 ||
+        index >= busRoutes.size())
     {
         return {};
     }
@@ -74,13 +144,24 @@ BusRoute BusNetwork::getBusRoute(int index)
     return busRoutes[index];
 }
 
-vector<int> BusNetwork::findBusesAtStop(int stopId)
+
+// ==========================================
+// FIND BUSES AT A STOP
+// ==========================================
+
+vector<int> BusNetwork::findBusesAtStop(
+    int stopId
+)
 {
     vector<int> result;
 
-    for (int i = 0; i < busRoutes.size(); i++)
+    for (int i = 0;
+         i < busRoutes.size();
+         i++)
     {
-        if (isStopInRoute(i, stopId))
+        if (isStopInRoute(
+                i,
+                stopId))
         {
             result.push_back(
                 busRoutes[i].busNumber
@@ -90,6 +171,11 @@ vector<int> BusNetwork::findBusesAtStop(int stopId)
 
     return result;
 }
+
+
+// ==========================================
+// CHECK STOP IN ROUTE
+// ==========================================
 
 bool BusNetwork::isStopInRoute(
     int busIndex,
@@ -102,7 +188,8 @@ bool BusNetwork::isStopInRoute(
         return false;
     }
 
-    for (int stop : busRoutes[busIndex].stops)
+    for (int stop :
+         busRoutes[busIndex].stops)
     {
         if (stop == stopId)
         {
@@ -113,16 +200,23 @@ bool BusNetwork::isStopInRoute(
     return false;
 }
 
+
+// ==========================================
+// CHECK BUS ROUTE
+// ==========================================
+
 bool BusNetwork::canTravelByBus(
     int startStop,
     int destinationStop
 )
 {
-    for (const BusRoute& route : busRoutes)
+    for (const BusRoute& route :
+         busRoutes)
     {
         bool startFound = false;
 
-        for (int stop : route.stops)
+        for (int stop :
+             route.stops)
         {
             if (stop == startStop)
             {
@@ -140,6 +234,11 @@ bool BusNetwork::canTravelByBus(
     return false;
 }
 
+
+// ==========================================
+// DISPLAY BUSES AT A STOP
+// ==========================================
+
 void BusNetwork::displayBusesAtStop(
     int stopId
 )
@@ -148,7 +247,8 @@ void BusNetwork::displayBusesAtStop(
         findBusesAtStop(stopId);
 
     cout << "\nBuses available at stop "
-         << stopId << ": ";
+         << stopId
+         << ": ";
 
     if (buses.empty())
     {
@@ -158,9 +258,11 @@ void BusNetwork::displayBusesAtStop(
         return;
     }
 
-    for (int busNumber : buses)
+    for (int busNumber :
+         buses)
     {
-        cout << busNumber << " ";
+        cout << busNumber
+             << " ";
     }
 
     cout << endl;
@@ -222,7 +324,8 @@ bool BusNetwork::boardPassengers(
         busRoutes[busIndex].capacity -
         busRoutes[busIndex].currentPassengers;
 
-    if (passengerCount > availableCapacity)
+    if (passengerCount >
+        availableCapacity)
     {
         return false;
     }
@@ -268,7 +371,7 @@ bool BusNetwork::leavePassengers(
 
 
 // ==========================================
-// AVAILABLE CAPACITY
+// GET AVAILABLE CAPACITY
 // ==========================================
 
 int BusNetwork::getAvailableCapacity(
@@ -294,7 +397,8 @@ void BusNetwork::displayBusStatus()
 {
     cout << "\n===== BUS STATUS =====\n";
 
-    for (const BusRoute& route : busRoutes)
+    for (const BusRoute& route :
+         busRoutes)
     {
         int available =
             route.capacity -

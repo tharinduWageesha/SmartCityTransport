@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+#include "Graph.h"
+
 using namespace std;
 
 struct BusRoute
@@ -26,6 +28,7 @@ private:
     vector<BusRoute> busRoutes;
 
 public:
+
     void addBusRoute(
         int busNumber,
         string routeName,
@@ -37,11 +40,17 @@ public:
 
     void displayBusRoutes();
 
+    void displayBusRoutes(
+        const Graph& city
+    );
+
     int getBusRouteCount();
 
     BusRoute getBusRoute(int index);
 
-    vector<int> findBusesAtStop(int stopId);
+    vector<int> findBusesAtStop(
+        int stopId
+    );
 
     bool isStopInRoute(
         int busIndex,
@@ -53,7 +62,9 @@ public:
         int destinationStop
     );
 
-    void displayBusesAtStop(int stopId);
+    void displayBusesAtStop(
+        int stopId
+    );
 
     bool isBusOperating(
         int busIndex,

@@ -47,7 +47,7 @@ public:
     void displayConnections();
 
     int getLocationCount();
-    string getLocationName(int id);
+    string getLocationName(int id) const;
     vector<Edge> getEdges(int id);
 };
 
