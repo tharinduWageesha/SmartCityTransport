@@ -28,7 +28,6 @@ int main()
     int mall =
         city.addLocation("Shopping Mall");
 
-
     // =========================
     // CREATE TRANSPORTATION
     // CONNECTIONS
@@ -38,58 +37,49 @@ int main()
         home,
         terminal,
         8,
-        "Bus"
-    );
+        "Bus");
 
     city.addBidirectionalConnection(
         terminal,
         university,
         12,
-        "Bus"
-    );
+        "Bus");
 
     city.addBidirectionalConnection(
         terminal,
         hospital,
         10,
-        "Bus"
-    );
+        "Bus");
 
     city.addBidirectionalConnection(
         home,
         station,
         15,
-        "Train"
-    );
+        "Train");
 
     city.addBidirectionalConnection(
         station,
         university,
         10,
-        "Train"
-    );
+        "Train");
 
     city.addBidirectionalConnection(
         station,
         mall,
         8,
-        "Train"
-    );
+        "Train");
 
     city.addBidirectionalConnection(
         university,
         mall,
         7,
-        "Bus"
-    );
+        "Bus");
 
     city.addBidirectionalConnection(
         hospital,
         mall,
         9,
-        "Bus"
-    );
-
+        "Bus");
 
     // =========================
     // CREATE BUS ROUTES
@@ -101,8 +91,7 @@ int main()
         {home, terminal, university},
         50,
         "06:00",
-        "22:00"
-    );
+        "22:00");
 
     busNetwork.addBusRoute(
         102,
@@ -110,8 +99,7 @@ int main()
         {terminal, hospital, mall},
         40,
         "06:30",
-        "21:30"
-    );
+        "21:30");
 
     busNetwork.addBusRoute(
         103,
@@ -119,9 +107,7 @@ int main()
         {home, terminal, hospital},
         45,
         "07:00",
-        "20:00"
-    );
-
+        "20:00");
 
     // =========================
     // DISPLAY CITY INFORMATION
@@ -131,13 +117,81 @@ int main()
 
     city.displayConnections();
 
-
     // =========================
     // DISPLAY BUS NETWORK
     // =========================
 
     busNetwork.displayBusRoutes();
 
+    // =========================
+    // BUS SCHEDULE TEST
+    // =========================
+
+    cout << "\n===== BUS SCHEDULE TEST =====\n";
+
+    if (busNetwork.isBusOperating(0, "10:00"))
+    {
+        cout << "Bus 101 is operating at 10:00."
+             << endl;
+    }
+    else
+    {
+        cout << "Bus 101 is not operating at 10:00."
+             << endl;
+    }
+
+    if (busNetwork.isBusOperating(0, "23:00"))
+    {
+        cout << "Bus 101 is operating at 23:00."
+             << endl;
+    }
+    else
+    {
+        cout << "Bus 101 is not operating at 23:00."
+             << endl;
+    }
+
+    // =========================
+    // PASSENGER BOARDING TEST
+    // =========================
+
+    cout << "\n===== PASSENGER TEST =====\n";
+
+    if (busNetwork.boardPassengers(0, 20))
+    {
+        cout << "20 passengers boarded Bus 101."
+             << endl;
+    }
+    else
+    {
+        cout << "Passengers could not board Bus 101."
+             << endl;
+    }
+
+    cout << "Available seats: "
+         << busNetwork.getAvailableCapacity(0)
+         << endl;
+
+    // =========================
+    // PASSENGERS LEAVING
+    // =========================
+
+    if (busNetwork.leavePassengers(0, 5))
+    {
+        cout << "5 passengers left Bus 101."
+             << endl;
+    }
+    else
+    {
+        cout << "Passengers could not leave Bus 101."
+             << endl;
+    }
+
+    // =========================
+    // DISPLAY FINAL STATUS
+    // =========================
+
+    busNetwork.displayBusStatus();
 
     // =========================
     // BUS SEARCH
@@ -146,8 +200,7 @@ int main()
     cout << "\n===== BUS SEARCH =====\n";
 
     busNetwork.displayBusesAtStop(
-        terminal
-    );
+        terminal);
 
     if (busNetwork.canTravelByBus(
             home,
@@ -164,7 +217,6 @@ int main()
         cout << "No direct bus route found."
              << endl;
     }
-
 
     return 0;
 }

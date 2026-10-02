@@ -15,6 +15,10 @@ void BusNetwork::addBusRoute(
     route.routeName = routeName;
     route.stops = stops;
     route.capacity = capacity;
+
+    // Initially the bus has no passengers
+    route.currentPassengers = 0;
+
     route.startTime = startTime;
     route.endTime = endTime;
 
@@ -43,6 +47,9 @@ void BusNetwork::displayBusRoutes()
         cout << "\nCapacity: "
              << route.capacity;
 
+        cout << "\nCurrent Passengers: "
+             << route.currentPassengers;
+
         cout << "\nOperating Time: "
              << route.startTime
              << " - "
@@ -59,6 +66,11 @@ int BusNetwork::getBusRouteCount()
 
 BusRoute BusNetwork::getBusRoute(int index)
 {
+    if (index < 0 || index >= busRoutes.size())
+    {
+        return {};
+    }
+
     return busRoutes[index];
 }
 
@@ -128,7 +140,9 @@ bool BusNetwork::canTravelByBus(
     return false;
 }
 
-void BusNetwork::displayBusesAtStop(int stopId)
+void BusNetwork::displayBusesAtStop(
+    int stopId
+)
 {
     vector<int> buses =
         findBusesAtStop(stopId);
@@ -150,4 +164,153 @@ void BusNetwork::displayBusesAtStop(int stopId)
     }
 
     cout << endl;
+}
+
+
+// ==========================================
+// CHECK BUS OPERATING TIME
+// ==========================================
+
+bool BusNetwork::isBusOperating(
+    int busIndex,
+    string currentTime
+)
+{
+    if (busIndex < 0 ||
+        busIndex >= busRoutes.size())
+    {
+        return false;
+    }
+
+    string startTime =
+        busRoutes[busIndex].startTime;
+
+    string endTime =
+        busRoutes[busIndex].endTime;
+
+    if (currentTime >= startTime &&
+        currentTime <= endTime)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+// ==========================================
+// BOARD PASSENGERS
+// ==========================================
+
+bool BusNetwork::boardPassengers(
+    int busIndex,
+    int passengerCount
+)
+{
+    if (busIndex < 0 ||
+        busIndex >= busRoutes.size())
+    {
+        return false;
+    }
+
+    if (passengerCount <= 0)
+    {
+        return false;
+    }
+
+    int availableCapacity =
+        busRoutes[busIndex].capacity -
+        busRoutes[busIndex].currentPassengers;
+
+    if (passengerCount > availableCapacity)
+    {
+        return false;
+    }
+
+    busRoutes[busIndex].currentPassengers +=
+        passengerCount;
+
+    return true;
+}
+
+
+// ==========================================
+// PASSENGERS LEAVE BUS
+// ==========================================
+
+bool BusNetwork::leavePassengers(
+    int busIndex,
+    int passengerCount
+)
+{
+    if (busIndex < 0 ||
+        busIndex >= busRoutes.size())
+    {
+        return false;
+    }
+
+    if (passengerCount <= 0)
+    {
+        return false;
+    }
+
+    if (passengerCount >
+        busRoutes[busIndex].currentPassengers)
+    {
+        return false;
+    }
+
+    busRoutes[busIndex].currentPassengers -=
+        passengerCount;
+
+    return true;
+}
+
+
+// ==========================================
+// AVAILABLE CAPACITY
+// ==========================================
+
+int BusNetwork::getAvailableCapacity(
+    int busIndex
+)
+{
+    if (busIndex < 0 ||
+        busIndex >= busRoutes.size())
+    {
+        return 0;
+    }
+
+    return busRoutes[busIndex].capacity -
+           busRoutes[busIndex].currentPassengers;
+}
+
+
+// ==========================================
+// DISPLAY BUS STATUS
+// ==========================================
+
+void BusNetwork::displayBusStatus()
+{
+    cout << "\n===== BUS STATUS =====\n";
+
+    for (const BusRoute& route : busRoutes)
+    {
+        int available =
+            route.capacity -
+            route.currentPassengers;
+
+        cout << "\nBus Number: "
+             << route.busNumber;
+
+        cout << "\nPassengers: "
+             << route.currentPassengers
+             << " / "
+             << route.capacity;
+
+        cout << "\nAvailable Seats: "
+             << available;
+
+        cout << "\n";
+    }
 }

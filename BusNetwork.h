@@ -12,7 +12,10 @@ struct BusRoute
     int busNumber;
     string routeName;
     vector<int> stops;
+
     int capacity;
+    int currentPassengers;
+
     string startTime;
     string endTime;
 };
@@ -51,6 +54,27 @@ public:
     );
 
     void displayBusesAtStop(int stopId);
+
+    bool isBusOperating(
+        int busIndex,
+        string currentTime
+    );
+
+    bool boardPassengers(
+        int busIndex,
+        int passengerCount
+    );
+
+    bool leavePassengers(
+        int busIndex,
+        int passengerCount
+    );
+
+    int getAvailableCapacity(
+        int busIndex
+    );
+
+    void displayBusStatus();
 };
 
 #endif
