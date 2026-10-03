@@ -91,7 +91,7 @@ void Graph::displayConnections()
     }
 }
 
-int Graph::getLocationCount()
+int Graph::getLocationCount() const
 {
     return locations.size();
 }
@@ -106,7 +106,7 @@ string Graph::getLocationName(int id) const
     return locations[id].name;
 }
 
-vector<Edge> Graph::getEdges(int id)
+vector<Edge> Graph::getEdges(int id) const
 {
     if (id < 0 ||
         id >= adjacencyList.size())
