@@ -1,6 +1,7 @@
 #include "Graph.h"
 #include "BusNetwork.h"
 #include "TrainNetwork.h"
+#include "PassengerSimulation.h"
 
 int main()
 {
@@ -9,6 +10,8 @@ int main()
     BusNetwork busNetwork;
 
     TrainNetwork trainNetwork;
+
+    PassengerSimulation passengerSimulation;
 
 
     // ======================================
@@ -45,14 +48,12 @@ int main()
         "Bus"
     );
 
-
     city.addBidirectionalConnection(
         terminal,
         university,
         12,
         "Bus"
     );
-
 
     city.addBidirectionalConnection(
         terminal,
@@ -61,14 +62,12 @@ int main()
         "Bus"
     );
 
-
     city.addBidirectionalConnection(
         university,
         mall,
         7,
         "Bus"
     );
-
 
     city.addBidirectionalConnection(
         hospital,
@@ -91,7 +90,6 @@ int main()
         "22:00"
     );
 
-
     busNetwork.addBusRoute(
         102,
         "Bus Terminal - Hospital - Mall",
@@ -100,7 +98,6 @@ int main()
         "06:30",
         "21:30"
     );
-
 
     busNetwork.addBusRoute(
         103,
@@ -127,7 +124,6 @@ int main()
         "23:00"
     );
 
-
     trainNetwork.addTrainRoute(
         city,
         202,
@@ -138,7 +134,6 @@ int main()
         "06:00",
         "22:00"
     );
-
 
     trainNetwork.addTrainRoute(
         city,
@@ -191,7 +186,6 @@ int main()
          << city.getLocationName(university)
          << " by bus: ";
 
-
     if (busNetwork.canTravelByBus(
             home,
             university))
@@ -210,7 +204,6 @@ int main()
 
     cout << "\n===== BUS SCHEDULE TEST =====\n";
 
-
     if (busNetwork.isBusOperating(
             0,
             "10:00"))
@@ -225,37 +218,17 @@ int main()
     }
 
 
-    if (busNetwork.isBusOperating(
-            0,
-            "23:00"))
-    {
-        cout << "Bus 101 is operating at 23:00."
-             << endl;
-    }
-    else
-    {
-        cout << "Bus 101 is not operating at 23:00."
-             << endl;
-    }
-
-
     // ======================================
     // BUS PASSENGER TEST
     // ======================================
 
     cout << "\n===== BUS PASSENGER TEST =====\n";
 
-
     if (busNetwork.boardPassengers(
             0,
             20))
     {
         cout << "20 passengers boarded Bus 101."
-             << endl;
-    }
-    else
-    {
-        cout << "Passengers could not board Bus 101."
              << endl;
     }
 
@@ -292,7 +265,6 @@ int main()
 
     cout << "\n===== TRAIN SEARCH =====\n";
 
-
     trainNetwork.displayTrainsAtStation(
         station
     );
@@ -304,13 +276,11 @@ int main()
 
     cout << "\n===== TRAIN ROUTE TEST =====\n";
 
-
     cout << "Can travel from "
          << city.getLocationName(station)
          << " to "
          << city.getLocationName(university)
          << " by train: ";
-
 
     if (trainNetwork.canTravelByTrain(
             station,
@@ -330,7 +300,6 @@ int main()
 
     cout << "\n===== TRAIN SCHEDULE TEST =====\n";
 
-
     if (trainNetwork.isTrainOperating(
             0,
             "10:00"))
@@ -345,37 +314,17 @@ int main()
     }
 
 
-    if (trainNetwork.isTrainOperating(
-            0,
-            "23:30"))
-    {
-        cout << "Train 201 is operating at 23:30."
-             << endl;
-    }
-    else
-    {
-        cout << "Train 201 is not operating at 23:30."
-             << endl;
-    }
-
-
     // ======================================
     // TRAIN PASSENGER TEST
     // ======================================
 
     cout << "\n===== TRAIN PASSENGER TEST =====\n";
 
-
     if (trainNetwork.boardPassengers(
             0,
             120))
     {
         cout << "120 passengers boarded Train 201."
-             << endl;
-    }
-    else
-    {
-        cout << "Passengers could not board Train 201."
              << endl;
     }
 
@@ -401,8 +350,7 @@ int main()
     // BFS ROUTE FINDING
     // ======================================
 
-    cout << "\n===== ROUTE FINDING TEST =====\n";
-
+    cout << "\n===== BFS ROUTE FINDING =====\n";
 
     trainNetwork.findRouteBFS(
         city,
@@ -412,11 +360,107 @@ int main()
 
 
     // ======================================
+    // MEMBER 3
+    // PASSENGER DEMAND
+    // ======================================
+
+    cout << "\n======================================\n";
+    cout << "   MEMBER 3 - PASSENGER SIMULATION\n";
+    cout << "======================================\n";
+
+
+    // ======================================
+    // MORNING DEMAND
+    // ======================================
+
+    cout << "\n===== MORNING DEMAND =====\n";
+
+    passengerSimulation.generateDemand(
+        city,
+        "Morning",
+        10
+    );
+
+
+    // ======================================
+    // AFTERNOON DEMAND
+    // ======================================
+
+    cout << "\n===== AFTERNOON DEMAND =====\n";
+
+    passengerSimulation.generateDemand(
+        city,
+        "Afternoon",
+        5
+    );
+
+
+    // ======================================
+    // EVENING DEMAND
+    // ======================================
+
+    cout << "\n===== EVENING DEMAND =====\n";
+
+    passengerSimulation.generateDemand(
+        city,
+        "Evening",
+        8
+    );
+
+
+    // ======================================
+    // DISPLAY DEMAND STATISTICS
+    // ======================================
+
+    passengerSimulation.displayDemandStatistics();
+
+
+    // ======================================
+    // DISPLAY PASSENGERS
+    // ======================================
+
+    passengerSimulation.displayPassengers(
+        city
+    );
+
+
+    // ======================================
+    // SIMULATE JOURNEYS
+    // ======================================
+
+    cout << "\n===== JOURNEY SIMULATION =====\n";
+
+    passengerSimulation.simulateJourneys(
+        city,
+        busNetwork,
+        trainNetwork,
+        "10:00"
+    );
+
+
+    // ======================================
+    // DISPLAY RESULTS
+    // ======================================
+
+    passengerSimulation.displaySimulationResults();
+
+
+    // ======================================
+    // FINAL PASSENGER STATUS
+    // ======================================
+
+    cout << "\n===== FINAL PASSENGER STATUS =====\n";
+
+    passengerSimulation.displayPassengers(
+        city
+    );
+
+
+    // ======================================
     // END
     // ======================================
 
     cout << "\n===== SYSTEM TEST COMPLETED =====\n";
-
 
     return 0;
 }
