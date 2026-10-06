@@ -1,6 +1,11 @@
 #include <iostream>
-#include <chrono>
-#include <limits>
+#include <vector>
+#include <string>
+#include <iomanip>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #include "Graph.h"
 #include "BusNetwork.h"
@@ -8,833 +13,258 @@
 #include "PassengerSimulation.h"
 #include "Profiler.h"
 
-using namespace std;
-
-// ==========================================
-// DISPLAY MAIN MENU
-// ==========================================
-
-void displayMenu()
+void buildImaginativeCity(Graph& city, BusNetwork& busNetwork, TrainNetwork& trainNetwork)
 {
-    cout << "\n";
-    cout << "==========================================\n";
-    cout << "   SMART CITY PUBLIC TRANSPORT SYSTEM\n";
-    cout << "==========================================\n";
+    int s0 = city.addStation("Home", "Residential Zone", StationType::BUS_STOP_ONLY);
+    int s1 = city.addStation("Bus Terminal", "Central Transit Hub", StationType::INTERMODAL_HUB);
+    int s2 = city.addStation("Railway Station", "Main Metro Hub", StationType::INTERMODAL_HUB);
+    int s3 = city.addStation("University", "Education Zone", StationType::INTERMODAL_HUB);
+    int s4 = city.addStation("Hospital", "Healthcare Zone", StationType::INTERMODAL_HUB);
+    int s5 = city.addStation("Shopping Mall", "Commercial Zone", StationType::BUS_STOP_ONLY);
 
-    cout << "\n1. Display City Network";
-    cout << "\n2. Bus Network Tests";
-    cout << "\n3. Train Network Tests";
-    cout << "\n4. BFS Route Finding";
-    cout << "\n5. Passenger Demand & Simulation";
-    cout << "\n6. Efficiency & Profiling Report";
-    cout << "\n7. Run Complete System Test";
-    cout << "\n8. Exit";
+    // Bus Routes (Part I)
+    busNetwork.registerBusRoute(city, {
+        "BUS-101",
+        "Route 101 (Home - Terminal - University)",
+        Mode::BUS,
+        {s0, s1, s3},
+        10,
+        50
+    });
 
-    cout << "\n\nEnter your choice: ";
+    busNetwork.registerBusRoute(city, {
+        "BUS-102",
+        "Route 102 (Terminal - Hospital - Shopping Mall)",
+        Mode::BUS,
+        {s1, s4, s5},
+        8,
+        40
+    });
+
+    busNetwork.registerBusRoute(city, {
+        "BUS-103",
+        "Route 103 (Home - Terminal - Hospital)",
+        Mode::BUS,
+        {s0, s1, s4},
+        12,
+        45
+    });
+
+    busNetwork.registerBusRoute(city, {
+        "BUS-104",
+        "Route 104 (University - Shopping Mall)",
+        Mode::BUS,
+        {s3, s5},
+        15,
+        50
+    });
+
+    // Train Routes (Part II)
+    trainNetwork.registerTrainRoute(city, {
+        "TRAIN-201",
+        "Metro 201 (Railway Station - University)",
+        Mode::TRAIN,
+        {s2, s3},
+        6,
+        300
+    });
+
+    trainNetwork.registerTrainRoute(city, {
+        "TRAIN-202",
+        "Metro 202 (Railway Station - Shopping Mall)",
+        Mode::TRAIN,
+        {s2, s5},
+        8,
+        250
+    });
+
+    trainNetwork.registerTrainRoute(city, {
+        "TRAIN-203",
+        "Shuttle 203 (Railway Station - Bus Terminal)",
+        Mode::TRAIN,
+        {s2, s1},
+        5,
+        350
+    });
 }
 
-// ==========================================
-// DISPLAY CITY NETWORK
-// ==========================================
-
-void displayCityNetwork(
-    Graph& city,
-    BusNetwork& busNetwork,
-    TrainNetwork& trainNetwork
-)
+void printBanner()
 {
-    cout << "\n======================================\n";
-    cout << "          CITY TRANSPORT NETWORK\n";
-    cout << "======================================\n";
-
-    city.displayLocations();
-
-    city.displayConnections();
-
-    busNetwork.displayBusRoutes(city);
-
-    trainNetwork.displayTrainRoutes(city);
+    std::cout << "\n==================================================\n";
+    std::cout << "   SMART CITY PUBLIC TRANSPORTATION SIMULATION    \n";
+    std::cout << "   Graph Theory & Multi-Modal Transit Model (C++) \n";
+    std::cout << "==================================================\n";
 }
 
-// ==========================================
-// BUS NETWORK TESTS
-// ==========================================
-
-void runBusTests(
-    Graph& city,
-    BusNetwork& busNetwork,
-    int terminal,
-    int home,
-    int university
-)
+void interactiveJourneyPlanner(const Graph& city)
 {
-    cout << "\n======================================\n";
-    cout << "            BUS NETWORK TESTS\n";
-    cout << "======================================\n";
-
-    // --------------------------------------
-    // BUS SEARCH
-    // --------------------------------------
-
-    cout << "\n===== BUS SEARCH =====\n";
-
-    busNetwork.displayBusesAtStop(
-        terminal
-    );
-
-    // --------------------------------------
-    // BUS ROUTE TEST
-    // --------------------------------------
-
-    cout << "\n===== BUS ROUTE TEST =====\n";
-
-    cout << "Can travel from "
-         << city.getLocationName(home)
-         << " to "
-         << city.getLocationName(university)
-         << " by bus: ";
-
-    if (busNetwork.canTravelByBus(
-            home,
-            university))
+    std::cout << "\n--------------------------------------------------\n";
+    std::cout << "  INTERACTIVE JOURNEY PLANNER (BFS)\n";
+    std::cout << "--------------------------------------------------\n";
+    std::cout << "Available Locations in City:\n";
+    for (const auto& s : city.getAllStations())
     {
-        cout << "YES" << endl;
+        std::cout << "  [" << s.id << "] " << std::left << std::setw(18) << s.name 
+                  << " (" << s.zone << ")\n";
+    }
+
+    std::cout << "\nEnter Origin ID (0 to " << (city.getStationCount() - 1) << "): ";
+    int origId;
+    if (!(std::cin >> origId) || origId < 0 || origId >= city.getStationCount())
+    {
+        std::cout << "Invalid Origin ID. Returning to menu.\n";
+        std::cin.clear();
+        std::string dummy;
+        std::getline(std::cin, dummy);
+        return;
+    }
+
+    std::cout << "Enter Destination ID (0 to " << (city.getStationCount() - 1) << "): ";
+    int destId;
+    if (!(std::cin >> destId) || destId < 0 || destId >= city.getStationCount())
+    {
+        std::cout << "Invalid Destination ID. Returning to menu.\n";
+        std::cin.clear();
+        std::string dummy;
+        std::getline(std::cin, dummy);
+        return;
+    }
+
+    std::cout << "\nEnter Departure Time (e.g., 07:30, 14:00, or 24h HH:MM) [default 08:00 AM]: ";
+    std::string timeInput;
+    char nextChar = std::cin.peek();
+    if (nextChar == '\n' || nextChar == '\r')
+    {
+        std::cin.get();
+        if (std::cin.peek() == '\n') std::cin.get();
+    }
+    std::getline(std::cin, timeInput);
+    size_t firstNonSpace = timeInput.find_first_not_of(" \t\r\n");
+    if (firstNonSpace == std::string::npos)
+    {
+        timeInput = "08:00 AM";
     }
     else
     {
-        cout << "NO" << endl;
+        size_t lastNonSpace = timeInput.find_last_not_of(" \t\r\n");
+        timeInput = timeInput.substr(firstNonSpace, lastNonSpace - firstNonSpace + 1);
     }
 
-    // --------------------------------------
-    // BUS SCHEDULE TEST
-    // --------------------------------------
-
-    cout << "\n===== BUS SCHEDULE TEST =====\n";
-
-    if (busNetwork.isBusOperating(
-            0,
-            "10:00"))
+    std::cout << "\nRouting Mode:\n";
+    std::cout << "  1. Multi-modal (Train + Bus auto)\n";
+    std::cout << "  2. Bus Only\n";
+    std::cout << "  3. Train Only\n";
+    std::cout << "Select (1-3): ";
+    int pref;
+    if (!(std::cin >> pref))
     {
-        cout << "Bus 101 is operating at 10:00."
-             << endl;
-    }
-    else
-    {
-        cout << "Bus 101 is not operating at 10:00."
-             << endl;
+        pref = 1;
+        std::cin.clear();
+        std::string dummy;
+        std::getline(std::cin, dummy);
     }
 
-    if (busNetwork.isBusOperating(
-            0,
-            "23:00"))
-    {
-        cout << "Bus 101 is operating at 23:00."
-             << endl;
-    }
-    else
-    {
-        cout << "Bus 101 is not operating at 23:00."
-             << endl;
-    }
+    Mode modeFilter = Mode::WALK_TRANSFER;
+    if (pref == 2) modeFilter = Mode::BUS;
+    else if (pref == 3) modeFilter = Mode::TRAIN;
 
-    // --------------------------------------
-    // PASSENGER CAPACITY TEST
-    // --------------------------------------
-
-    cout << "\n===== BUS PASSENGER TEST =====\n";
-
-    if (busNetwork.boardPassengers(
-            0,
-            20))
-    {
-        cout << "20 passengers boarded Bus 101."
-             << endl;
-    }
-    else
-    {
-        cout << "Passengers could not board Bus 101."
-             << endl;
-    }
-
-    cout << "Available seats on Bus 101: "
-         << busNetwork.getAvailableCapacity(0)
-         << endl;
-
-    if (busNetwork.leavePassengers(
-            0,
-            5))
-    {
-        cout << "5 passengers left Bus 101."
-             << endl;
-    }
-
-    busNetwork.displayBusStatus();
+    Itinerary itin = city.findPathBFS(origId, destId, modeFilter);
+    TimeDemandInfo demand = PassengerSimulation::analyzeTimeAndDemand(timeInput, origId, destId, itin);
+    PassengerSimulation::printItineraryDetailsWithDemand(city, itin, demand);
 }
-
-// ==========================================
-// TRAIN NETWORK TESTS
-// ==========================================
-
-void runTrainTests(
-    Graph& city,
-    TrainNetwork& trainNetwork,
-    int station,
-    int university
-)
-{
-    cout << "\n======================================\n";
-    cout << "           TRAIN NETWORK TESTS\n";
-    cout << "======================================\n";
-
-    // --------------------------------------
-    // TRAIN SEARCH
-    // --------------------------------------
-
-    cout << "\n===== TRAIN SEARCH =====\n";
-
-    trainNetwork.displayTrainsAtStation(
-        station
-    );
-
-    // --------------------------------------
-    // TRAIN ROUTE TEST
-    // --------------------------------------
-
-    cout << "\n===== TRAIN ROUTE TEST =====\n";
-
-    cout << "Can travel from "
-         << city.getLocationName(station)
-         << " to "
-         << city.getLocationName(university)
-         << " by train: ";
-
-    if (trainNetwork.canTravelByTrain(
-            station,
-            university))
-    {
-        cout << "YES" << endl;
-    }
-    else
-    {
-        cout << "NO" << endl;
-    }
-
-    // --------------------------------------
-    // TRAIN SCHEDULE TEST
-    // --------------------------------------
-
-    cout << "\n===== TRAIN SCHEDULE TEST =====\n";
-
-    if (trainNetwork.isTrainOperating(
-            0,
-            "10:00"))
-    {
-        cout << "Train 201 is operating at 10:00."
-             << endl;
-    }
-    else
-    {
-        cout << "Train 201 is not operating at 10:00."
-             << endl;
-    }
-
-    if (trainNetwork.isTrainOperating(
-            0,
-            "23:30"))
-    {
-        cout << "Train 201 is operating at 23:30."
-             << endl;
-    }
-    else
-    {
-        cout << "Train 201 is not operating at 23:30."
-             << endl;
-    }
-
-    // --------------------------------------
-    // TRAIN CAPACITY TEST
-    // --------------------------------------
-
-    cout << "\n===== TRAIN PASSENGER TEST =====\n";
-
-    if (trainNetwork.boardPassengers(
-            0,
-            120))
-    {
-        cout << "120 passengers boarded Train 201."
-             << endl;
-    }
-    else
-    {
-        cout << "Passengers could not board Train 201."
-             << endl;
-    }
-
-    cout << "Available seats on Train 201: "
-         << trainNetwork.getAvailableCapacity(0)
-         << endl;
-
-    if (trainNetwork.leavePassengers(
-            0,
-            30))
-    {
-        cout << "30 passengers left Train 201."
-             << endl;
-    }
-
-    trainNetwork.displayTrainStatus();
-}
-
-// ==========================================
-// BFS TEST
-// ==========================================
-
-void runBFSTest(
-    Graph& city,
-    TrainNetwork& trainNetwork,
-    int home,
-    int mall
-)
-{
-    cout << "\n======================================\n";
-    cout << "             BFS ROUTE TEST\n";
-    cout << "======================================\n";
-
-    trainNetwork.findRouteBFS(
-        city,
-        home,
-        mall
-    );
-}
-
-// ==========================================
-// PASSENGER DEMAND & SIMULATION
-// ==========================================
-
-void runPassengerSimulation(
-    Graph& city,
-    BusNetwork& busNetwork,
-    TrainNetwork& trainNetwork,
-    PassengerSimulation& passengerSimulation,
-    Profiler& profiler
-)
-{
-    cout << "\n======================================\n";
-    cout << "       MEMBER 3 - PASSENGER SIMULATION\n";
-    cout << "======================================\n";
-
-    // --------------------------------------
-    // MORNING DEMAND
-    // --------------------------------------
-
-    cout << "\n===== MORNING DEMAND =====\n";
-
-    passengerSimulation.generateDemand(
-        city,
-        "Morning",
-        10
-    );
-
-    // --------------------------------------
-    // AFTERNOON DEMAND
-    // --------------------------------------
-
-    cout << "\n===== AFTERNOON DEMAND =====\n";
-
-    passengerSimulation.generateDemand(
-        city,
-        "Afternoon",
-        5
-    );
-
-    // --------------------------------------
-    // EVENING DEMAND
-    // --------------------------------------
-
-    cout << "\n===== EVENING DEMAND =====\n";
-
-    passengerSimulation.generateDemand(
-        city,
-        "Evening",
-        8
-    );
-
-    // --------------------------------------
-    // DEMAND STATISTICS
-    // --------------------------------------
-
-    passengerSimulation.displayDemandStatistics();
-
-    // --------------------------------------
-    // PASSENGER LIST
-    // --------------------------------------
-
-    passengerSimulation.displayPassengers(
-        city
-    );
-
-    // --------------------------------------
-    // SIMULATION
-    // --------------------------------------
-
-    cout << "\n===== JOURNEY SIMULATION =====\n";
-
-    auto startTime =
-        chrono::high_resolution_clock::now();
-
-    passengerSimulation.simulateJourneys(
-        city,
-        busNetwork,
-        trainNetwork,
-        "10:00"
-    );
-
-    auto endTime =
-        chrono::high_resolution_clock::now();
-
-    chrono::duration<double, milli> elapsed =
-        endTime - startTime;
-
-    profiler.setSimulationTime(
-        elapsed.count()
-    );
-
-    // --------------------------------------
-    // RESULTS
-    // --------------------------------------
-
-    passengerSimulation.displaySimulationResults();
-
-    // --------------------------------------
-    // FINAL STATUS
-    // --------------------------------------
-
-    cout << "\n===== FINAL PASSENGER STATUS =====\n";
-
-    passengerSimulation.displayPassengers(
-        city
-    );
-
-    cout << "\nPassenger simulation completed."
-         << endl;
-}
-
-// ==========================================
-// RUN COMPLETE SYSTEM TEST
-// ==========================================
-
-void runCompleteSystemTest(
-    Graph& city,
-    BusNetwork& busNetwork,
-    TrainNetwork& trainNetwork,
-    PassengerSimulation& passengerSimulation,
-    Profiler& profiler,
-    int home,
-    int terminal,
-    int station,
-    int university,
-    int mall
-)
-{
-    cout << "\n";
-    cout << "==========================================\n";
-    cout << "          COMPLETE SYSTEM TEST\n";
-    cout << "==========================================\n";
-
-    displayCityNetwork(
-        city,
-        busNetwork,
-        trainNetwork
-    );
-
-    runBusTests(
-        city,
-        busNetwork,
-        terminal,
-        home,
-        university
-    );
-
-    runTrainTests(
-        city,
-        trainNetwork,
-        station,
-        university
-    );
-
-    runBFSTest(
-        city,
-        trainNetwork,
-        home,
-        mall
-    );
-
-    runPassengerSimulation(
-        city,
-        busNetwork,
-        trainNetwork,
-        passengerSimulation,
-        profiler
-    );
-
-    // --------------------------------------
-    // BFS PERFORMANCE TEST
-    // --------------------------------------
-
-    cout << "\n===== BFS PERFORMANCE TEST =====\n";
-
-    double bfsTime =
-        profiler.measureBFS(
-            passengerSimulation,
-            city,
-            home,
-            mall,
-            1000
-        );
-
-    cout << "Average BFS execution time: "
-         << bfsTime
-         << " ms"
-         << endl;
-
-    // --------------------------------------
-    // FINAL EFFICIENCY REPORT
-    // --------------------------------------
-
-    profiler.displayEfficiencyReport(
-        passengerSimulation
-    );
-
-    cout << "\n==========================================\n";
-    cout << "       SYSTEM TEST COMPLETED\n";
-    cout << "==========================================\n";
-}
-
-// ==========================================
-// MAIN
-// ==========================================
 
 int main()
 {
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+
     Graph city;
-
     BusNetwork busNetwork;
-
     TrainNetwork trainNetwork;
+    buildImaginativeCity(city, busNetwork, trainNetwork);
 
-    PassengerSimulation passengerSimulation;
+    PassengerSimulation passengerSim(city);
 
-    Profiler profiler;
+    printBanner();
+    std::cout << "City Graph Initialized: " << city.getStationCount() 
+              << " Locations | " << city.getEdgeCount() << " Transit Corridors\n";
+    std::cout << "Transit Policy: 100% Public Transportation Allowed\n";
 
-    // ======================================
-    // CREATE CITY LOCATIONS
-    // ======================================
-
-    int home =
-        city.addLocation("Home");
-
-    int terminal =
-        city.addLocation("Bus Terminal");
-
-    int station =
-        city.addLocation("Railway Station");
-
-    int university =
-        city.addLocation("University");
-
-    int hospital =
-        city.addLocation("Hospital");
-
-    int mall =
-        city.addLocation("Shopping Mall");
-
-    // ======================================
-    // CREATE BUS CONNECTIONS
-    // ======================================
-
-    city.addBidirectionalConnection(
-        home,
-        terminal,
-        8,
-        "Bus"
-    );
-
-    city.addBidirectionalConnection(
-        terminal,
-        university,
-        12,
-        "Bus"
-    );
-
-    city.addBidirectionalConnection(
-        terminal,
-        hospital,
-        10,
-        "Bus"
-    );
-
-    city.addBidirectionalConnection(
-        university,
-        mall,
-        7,
-        "Bus"
-    );
-
-    city.addBidirectionalConnection(
-        hospital,
-        mall,
-        9,
-        "Bus"
-    );
-
-    // ======================================
-    // CREATE BUS ROUTES
-    // ======================================
-
-    busNetwork.addBusRoute(
-        101,
-        "Home - University",
-        {home, terminal, university},
-        50,
-        "06:00",
-        "22:00"
-    );
-
-    busNetwork.addBusRoute(
-        102,
-        "Bus Terminal - Hospital - Mall",
-        {terminal, hospital, mall},
-        40,
-        "06:30",
-        "21:30"
-    );
-
-    busNetwork.addBusRoute(
-        103,
-        "Home - Bus Terminal - Hospital",
-        {home, terminal, hospital},
-        45,
-        "07:00",
-        "20:00"
-    );
-
-    // ======================================
-    // CREATE TRAIN ROUTES
-    // ======================================
-
-    trainNetwork.addTrainRoute(
-        city,
-        201,
-        "Railway Station - University",
-        {station, university},
-        10,
-        300,
-        "05:30",
-        "23:00"
-    );
-
-    trainNetwork.addTrainRoute(
-        city,
-        202,
-        "Railway Station - Shopping Mall",
-        {station, mall},
-        8,
-        250,
-        "06:00",
-        "22:00"
-    );
-
-    trainNetwork.addTrainRoute(
-        city,
-        203,
-        "Home - Railway Station - University",
-        {home, station, university},
-        12,
-        350,
-        "05:00",
-        "21:30"
-    );
-
-    // ======================================
-    // MAIN MENU
-    // ======================================
-
-    int choice;
-
-    do
+    while (true)
     {
-        displayMenu();
+        std::cout << "\n==================================================\n";
+        std::cout << "                MAIN SIMULATION MENU              \n";
+        std::cout << "==================================================\n";
+        std::cout << "1. Display City Network & Locations\n";
+        std::cout << "2. Simulate Bus Routes & Network\n";
+        std::cout << "3. Simulate Train Routes & Network\n";
+        std::cout << "4. Variable Passenger Demand & Req III Demo\n";
+        std::cout << "5. System Profiling & Efficiency Report\n";
+        std::cout << "6. Interactive Journey Planner (BFS Route Finder)\n";
+        std::cout << "7. Run Complete Automated Simulation\n";
+        std::cout << "8. Exit\n";
+        std::cout << "--------------------------------------------------\n";
+        std::cout << "Enter your choice (1-8): ";
 
-        cin >> choice;
-
-        if (cin.fail())
+        int choice;
+        if (!(std::cin >> choice))
         {
-            cin.clear();
-
-            cin.ignore(
-                numeric_limits<streamsize>::max(),
-                '\n'
-            );
-
-            cout << "\nInvalid input."
-                 << endl;
-
+            if (std::cin.eof()) break;
+            std::cin.clear();
+            std::string dummy;
+            std::getline(std::cin, dummy);
+            std::cout << "Invalid input. Please enter a number between 1 and 8.\n";
             continue;
         }
 
         switch (choice)
         {
-            // ------------------------------
-            // DISPLAY NETWORK
-            // ------------------------------
-
             case 1:
-
-                displayCityNetwork(
-                    city,
-                    busNetwork,
-                    trainNetwork
-                );
-
+                city.displayLocations();
                 break;
-
-            // ------------------------------
-            // BUS TESTS
-            // ------------------------------
-
             case 2:
-
-                runBusTests(
-                    city,
-                    busNetwork,
-                    terminal,
-                    home,
-                    university
-                );
-
+                busNetwork.displayBusNetwork(city);
                 break;
-
-            // ------------------------------
-            // TRAIN TESTS
-            // ------------------------------
-
             case 3:
-
-                runTrainTests(
-                    city,
-                    trainNetwork,
-                    station,
-                    university
-                );
-
+                trainNetwork.displayTrainNetwork(city);
                 break;
-
-            // ------------------------------
-            // BFS
-            // ------------------------------
-
             case 4:
-
-                runBFSTest(
-                    city,
-                    trainNetwork,
-                    home,
-                    mall
-                );
-
+                passengerSim.runRequirement3Demo();
                 break;
-
-            // ------------------------------
-            // PASSENGER SIMULATION
-            // ------------------------------
-
             case 5:
-
-                runPassengerSimulation(
-                    city,
-                    busNetwork,
-                    trainNetwork,
-                    passengerSimulation,
-                    profiler
-                );
-
-                break;
-
-            // ------------------------------
-            // PROFILING
-            // ------------------------------
-
-            case 6:
             {
-                cout << "\n===== BFS PERFORMANCE TEST =====\n";
-
-                double bfsTime =
-                    profiler.measureBFS(
-                        passengerSimulation,
-                        city,
-                        home,
-                        mall,
-                        1000
-                    );
-
-                cout << "Average BFS execution time: "
-                     << bfsTime
-                     << " ms"
-                     << endl;
-
-                profiler.displayEfficiencyReport(
-                    passengerSimulation
-                );
-
+                std::cout << "\nBenchmarking 100 passenger trips under peak demand...\n";
+                auto morningPax = passengerSim.generatePassengerDemand(TimeOfDay::MORNING_PEAK, 100);
+                ProfilingReport rep = Profiler::profileSimulation(city, morningPax);
+                Profiler::displayEfficiencyReport(rep);
                 break;
             }
-
-            // ------------------------------
-            // COMPLETE TEST
-            // ------------------------------
-
+            case 6:
+                interactiveJourneyPlanner(city);
+                break;
             case 7:
-
-                runCompleteSystemTest(
-                    city,
-                    busNetwork,
-                    trainNetwork,
-                    passengerSimulation,
-                    profiler,
-                    home,
-                    terminal,
-                    station,
-                    university,
-                    mall
-                );
-
+            {
+                std::cout << "\n>>> RUNNING COMPLETE DEMONSTRATION OF ALL REQUIREMENTS <<<\n";
+                city.displayLocations();
+                busNetwork.displayBusNetwork(city);
+                trainNetwork.displayTrainNetwork(city);
+                passengerSim.runRequirement3Demo();
+                
+                std::cout << "\nBenchmarking 100 passenger trips under peak demand...\n";
+                auto morningPax = passengerSim.generatePassengerDemand(TimeOfDay::MORNING_PEAK, 100);
+                ProfilingReport rep = Profiler::profileSimulation(city, morningPax);
+                Profiler::displayEfficiencyReport(rep);
                 break;
-
-            // ------------------------------
-            // EXIT
-            // ------------------------------
-
+            }
             case 8:
-
-                cout << "\nExiting Smart City "
-                     << "Public Transport System..."
-                     << endl;
-
-                break;
-
-            // ------------------------------
-            // INVALID
-            // ------------------------------
-
+                std::cout << "\nExiting Smart City Transport Simulation. Thank you!\n\n";
+                return 0;
             default:
-
-                cout << "\nInvalid choice. "
-                     << "Please select 1-8."
-                     << endl;
+                std::cout << "Choice out of range. Please choose 1-8.\n";
+                break;
         }
-
     }
-    while (choice != 8);
 
     return 0;
 }

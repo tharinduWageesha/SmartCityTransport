@@ -7,85 +7,29 @@
 
 #include "Graph.h"
 
-using namespace std;
-
-struct BusRoute
+struct RouteInfo
 {
-    int busNumber;
-    string routeName;
-    vector<int> stops;
-
-    int capacity;
-    int currentPassengers;
-
-    string startTime;
-    string endTime;
+    std::string routeId;
+    std::string routeName;
+    Mode mode;
+    std::vector<int> stationSequence;
+    int frequencyMin;
+    int capacityPerVehicle;
 };
 
 class BusNetwork
 {
 private:
-    vector<BusRoute> busRoutes;
+    std::vector<RouteInfo> busRoutes;
 
 public:
+    BusNetwork();
 
-    void addBusRoute(
-        int busNumber,
-        string routeName,
-        vector<int> stops,
-        int capacity,
-        string startTime,
-        string endTime
-    );
+    void registerBusRoute(Graph& city, const RouteInfo& route);
 
-    void displayBusRoutes();
+    const std::vector<RouteInfo>& getBusRoutes() const;
 
-    void displayBusRoutes(
-        const Graph& city
-    );
-
-    int getBusRouteCount();
-
-    BusRoute getBusRoute(int index);
-
-    vector<int> findBusesAtStop(
-        int stopId
-    );
-
-    bool isStopInRoute(
-        int busIndex,
-        int stopId
-    );
-
-    bool canTravelByBus(
-        int startStop,
-        int destinationStop
-    );
-
-    void displayBusesAtStop(
-        int stopId
-    );
-
-    bool isBusOperating(
-        int busIndex,
-        string currentTime
-    );
-
-    bool boardPassengers(
-        int busIndex,
-        int passengerCount
-    );
-
-    bool leavePassengers(
-        int busIndex,
-        int passengerCount
-    );
-
-    int getAvailableCapacity(
-        int busIndex
-    );
-
-    void displayBusStatus();
+    void displayBusNetwork(const Graph& city) const;
 };
 
 #endif

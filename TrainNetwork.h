@@ -6,143 +6,21 @@
 #include <string>
 
 #include "Graph.h"
-
-using namespace std;
-
-
-// ==========================================
-// TRAIN ROUTE STRUCTURE
-// ==========================================
-
-struct TrainRoute
-{
-    int trainNumber;
-    string routeName;
-
-    vector<int> stations;
-
-    int capacity;
-    int currentPassengers;
-
-    string startTime;
-    string endTime;
-};
-
-
-// ==========================================
-// TRAIN NETWORK CLASS
-// ==========================================
+#include "BusNetwork.h"
 
 class TrainNetwork
 {
 private:
-
-    vector<TrainRoute> trainRoutes;
-
+    std::vector<RouteInfo> trainRoutes;
 
 public:
+    TrainNetwork();
 
-    // ======================================
-    // TRAIN ROUTE MANAGEMENT
-    // ======================================
+    void registerTrainRoute(Graph& city, const RouteInfo& route);
 
-    void addTrainRoute(
-        Graph& city,
-        int trainNumber,
-        string routeName,
-        vector<int> stations,
-        int travelTime,
-        int capacity,
-        string startTime,
-        string endTime
-    );
+    const std::vector<RouteInfo>& getTrainRoutes() const;
 
-
-    void displayTrainRoutes();
-
-
-    void displayTrainRoutes(
-        const Graph& city
-    );
-
-
-    int getTrainRouteCount();
-
-
-    TrainRoute getTrainRoute(
-        int index
-    );
-
-
-    // ======================================
-    // TRAIN STATION SEARCH
-    // ======================================
-
-    vector<int> findTrainsAtStation(
-        int stationId
-    );
-
-
-    bool isStationInRoute(
-        int trainIndex,
-        int stationId
-    );
-
-
-    bool canTravelByTrain(
-        int startStation,
-        int destinationStation
-    );
-
-
-    void displayTrainsAtStation(
-        int stationId
-    );
-
-
-    // ======================================
-    // TRAIN SCHEDULE
-    // ======================================
-
-    bool isTrainOperating(
-        int trainIndex,
-        string currentTime
-    );
-
-
-    // ======================================
-    // PASSENGER MANAGEMENT
-    // ======================================
-
-    bool boardPassengers(
-        int trainIndex,
-        int passengerCount
-    );
-
-
-    bool leavePassengers(
-        int trainIndex,
-        int passengerCount
-    );
-
-
-    int getAvailableCapacity(
-        int trainIndex
-    );
-
-
-    void displayTrainStatus();
-
-
-    // ======================================
-    // BFS ROUTE FINDING
-    // ======================================
-
-    void findRouteBFS(
-        Graph& city,
-        int start,
-        int destination
-    );
+    void displayTrainNetwork(const Graph& city) const;
 };
 
 #endif

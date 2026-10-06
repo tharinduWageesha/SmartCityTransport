@@ -4,51 +4,60 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <unordered_map>
+#include <queue>
+#include <algorithm>
 
-using namespace std;
+#include "Passenger.h"
 
 struct Edge
 {
-    int destination;
-    int travelTime;
-    string transportMode;
+    int to;
+    Mode mode;
+    std::string routeName;
+    int travelTimeMin;
+    double distanceKm;
 };
 
-struct Location
+struct Station
 {
     int id;
-    string name;
+    std::string name;
+    std::string zone;
+    StationType type;
 };
 
 class Graph
 {
 private:
-    vector<Location> locations;
-    vector<vector<Edge>> adjacencyList;
+    std::vector<Station> stations;
+    std::unordered_map<std::string, int> stationNameToId;
+    std::vector<std::vector<Edge>> adj;
 
 public:
-    int addLocation(string name);
+    Graph();
 
-    void addConnection(
-        int from,
-        int to,
-        int travelTime,
-        string transportMode
-    );
+    int addStation(const std::string& name, const std::string& zone, StationType type);
 
-    void addBidirectionalConnection(
-        int from,
-        int to,
-        int travelTime,
-        string transportMode
-    );
+    void addDirectEdge(int u, int v, Mode mode, const std::string& routeName, int timeMin, double distKm);
 
-    void displayLocations();
-    void displayConnections();
+    void addUndirectedEdge(int u, int v, Mode mode, const std::string& routeName, int timeMin, double distKm);
 
-    int getLocationCount() const;
-    string getLocationName(int id) const;
-    vector<Edge> getEdges(int id) const;
+    int getStationCount() const;
+    int getEdgeCount() const;
+
+    const Station& getStation(int id) const;
+    int getStationId(const std::string& name) const;
+    const std::vector<Station>& getAllStations() const;
+    const std::vector<Edge>& getNeighbors(int u) const;
+
+    void displayLocations() const;
+
+    Itinerary findPathBFS(int startNode, int targetNode, Mode allowedMode = Mode::WALK_TRANSFER) const;
+
+    Itinerary findMultiModalJourneyBFS(int startNode, int transferHub, int destNode, Mode mode1, Mode mode2) const;
+
+    Itinerary findSmartIntermodalRouteBFS(int startNode, int destNode) const;
 };
 
 #endif
